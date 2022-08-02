@@ -63,26 +63,25 @@ def grab_static_eip(valid_ips, invalid_ips):
 
     addresses = describe_addresses()['Addresses']
 
-    logger.debug('Looking at {} addresses'.format(len(addresses)))
+    logger.debug(f'Looking at {len(addresses)} addresses')
 
     for ipinfo in addresses:
         public_ip = ipinfo['PublicIp']
 
         if _is_associated(ipinfo):
-            logger.debug('{} is already associated'.format(public_ip))
+            logger.debug(f'{public_ip} is already associated')
             continue
 
         if _is_valid(public_ip, valid_ips, invalid_ips):
-            logger.info('Attempting to associate {}'.format(public_ip))
+            logger.info(f'Attempting to associate {public_ip}')
 
             assoc_id = associate_address(ipinfo['AllocationId'])
 
-            logger.info('Successfully associated {}, got id {}'.format(
-                ipinfo['PublicIp'], assoc_id))
+            logger.info(f"Successfully associated {ipinfo['PublicIp']}, got id {assoc_id}")
             return assoc_id
 
         else:
-            logger.debug('{} is not valid'.format(ipinfo['PublicIp']))
+            logger.debug(f"{ipinfo['PublicIp']} is not valid")
 
     raise CustomError('No available valid EIPs found')
 
@@ -95,10 +94,7 @@ def _is_valid(public_ip, valid_ips, invalid_ips):
     if invalid_ips and _is_ip_in_range(public_ip, invalid_ips):
         return False
 
-    if _is_ip_in_range(public_ip, valid_ips):
-        return True
-    else:
-        return False
+    return bool(_is_ip_in_range(public_ip, valid_ips))
 
 # From aws-ec2-assign-elastic-ip, used under the terms of the Apache license
 def _is_ip_in_range(address, ips):
@@ -118,12 +114,8 @@ def _is_ip_in_range(address, ips):
 
         except AddrFormatError as err:
             logger.error('Invalid valid IP configured: {0}'.format(err))
-            pass
-
         except AddrConversionError as err:
             logger.error('Invalid valid IP configured: {0}'.format(err))
-            pass
-
     return False
 
 
